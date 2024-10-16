@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="bg-gray-900 flex items-center justify-center min-h-screen">
+    <div class="bg-white shadow-lg rounded-lg p-6  text-center w-1/2" id="weatherCard">
+        <!-- Search bar -->
+        <div class="relative mb-6">
+            <input 
+                type="text" 
+                id="cityInput" 
+                placeholder="search your city..." 
+                class="w-full py-2 pl-10 pr-4 bg-gray-200 rounded-full focus:outline-none"
+            >
+            <svg xmlns="http://www.w3.org/2000/svg" 
+                class="h-5 w-5 absolute top-2.5 left-3 text-gray-500" 
+                viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l4.241 4.242a1 1 0 01-1.415 1.414l-4.242-4.241zM8 14A6 6 0 108 2a6 6 0 000 12z" clip-rule="evenodd" />
+            </svg>
+            <button type="submit" id="btnSearch" class="btnSearch h-8 w-20 absolute top-1 rounded-2xl right-1 hover:bg-green-600 text-white bg-blue-700 text-2xl">Search</button>
+        </div>
+
+        <!-- City and date -->
+        <h1 class="text-2xl font-semibold text-gray-800" id="cityName">City, Country</h1>
+        <p class="text-gray-500" id="dateTime">Date and Time</p>
+        
+        <!-- Weather status -->
+        <div class="flex justify-center items-center mt-4">
+            <div class="bg-red-500 rounded-full h-10 w-10" id="weatherIcon"></div>
+            <p class="text-xl ml-2 text-gray-700" id="weatherCondition">Clear</p>
+        </div>
+        
+        <!-- Temperature -->
+        <p class="text-5xl font-bold text-gray-800 mt-4" id="temperature">0°</p>
+        <p class="text-gray-500" id="minMaxTemp">Min: 0° | Max: 0°</p>
+
+        <!-- Weather details -->
+        <div class="grid grid-cols-2 gap-4 mt-6 text-sm">
+            <div class="flex flex-col items-center shadow-md">
+                <span class="text-gray-500">Feels like:</span>
+                <span class="font-semibold text-gray-800" id="feelsLike"></span>
+            </div>
+            <div class="flex flex-col items-center shadow-md">
+                <span class="text-gray-500">Humidity:</span>
+                <span class="font-semibold text-gray-800" id="humidity"></span>
+            </div>
+            <div class="flex flex-col items-center shadow-md">
+                <span class="text-gray-500">Wind:</span>
+                <span class="font-semibold text-gray-800" id="windSpeed"></span>
+            </div>
+            <div class="flex flex-col items-center shadow-md">
+                <span class="text-gray-500">Pressure:</span>
+                <span class="font-semibold text-gray-800" id="pressure"></span>
+            </div>
+        </div>
+    </div>
+    <script src="/script.js"> </script>
+   
+</body>
+</html>
