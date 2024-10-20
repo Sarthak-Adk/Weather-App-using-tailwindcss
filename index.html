@@ -7,16 +7,30 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .hidden { display: none; }
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #3b82f6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .toggle-btn { cursor: pointer; }
     </style>
 </head>
 <body class="bg-gray-900 flex items-center justify-center min-h-screen">
-    <div class="bg-white shadow-lg rounded-lg p-6  text-center w-1/2" id="weatherCard">
+
+    <div class="bg-white shadow-lg rounded-lg p-6 text-center w-full md:w-1/2" id="weatherCard">
         <!-- Search bar -->
         <div class="relative mb-6">
             <input 
                 type="text" 
                 id="cityInput" 
-                placeholder="search your city..." 
+                placeholder="Search your city..." 
                 class="w-full py-2 pl-10 pr-4 bg-gray-200 rounded-full focus:outline-none"
             >
             <svg xmlns="http://www.w3.org/2000/svg" 
@@ -24,7 +38,16 @@
                 viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M12.9 14.32a8 8 0 111.414-1.414l4.241 4.242a1 1 0 01-1.415 1.414l-4.242-4.241zM8 14A6 6 0 108 2a6 6 0 000 12z" clip-rule="evenodd" />
             </svg>
-            <button type="submit" id="btnSearch" class="btnSearch h-8 w-20 absolute top-1 rounded-2xl right-1 hover:bg-green-600 text-white bg-blue-700 text-2xl">Search</button>
+            <button 
+            type="submit" 
+            id="btnSearch" 
+            class="h-8 w-20 absolute top-1 right-1 rounded-2xl bg-blue-600 text-white text-xl hover:bg-blue-400 transition-all duration-200"
+        >Search</button>
+        </div>
+
+        <!-- Loading spinner -->
+        <div id="loading" class="hidden flex justify-center items-center mb-4">
+            <div class="loading-spinner"></div>
         </div>
 
         <!-- City and date -->
@@ -33,12 +56,15 @@
         
         <!-- Weather status -->
         <div class="flex justify-center items-center mt-4">
-            <div class="bg-red-500 rounded-full h-10 w-10" id="weatherIcon"></div>
+            <div class="bg-gray-200 rounded-full h-10 w-10" id="weatherIcon"></div>
             <p class="text-xl ml-2 text-gray-700" id="weatherCondition">Clear</p>
         </div>
         
         <!-- Temperature -->
-        <p class="text-5xl font-bold text-gray-800 mt-4" id="temperature">0°</p>
+        <div class="flex justify-center items-center mt-4">
+            <p class="text-5xl font-bold text-gray-800" id="temperature">0°</p>
+            <span class="ml-2 text-gray-500 toggle-btn" id="unitToggle">°C</span>
+        </div>
         <p class="text-gray-500" id="minMaxTemp">Min: 0° | Max: 0°</p>
 
         <!-- Weather details -->
@@ -60,8 +86,11 @@
                 <span class="font-semibold text-gray-800" id="pressure"></span>
             </div>
         </div>
+
+        <!-- Error message -->
+        <div id="errorMessage" class="hidden text-red-500 mt-4"></div>
     </div>
-    <script src="/script.js"> </script>
-   
+
+    <script src="/script.js"></script>
 </body>
 </html>

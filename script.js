@@ -1,54 +1,72 @@
 const apiKey = '2a57e1e4c13eb0579d5b5f223462a126'; // Replace with your OpenWeatherMap API key
 
+let isCelsius = true; // Track temperature unit
+
 // Function to fetch weather data by city name
 async function fetchWeather(city) {
+    showLoading();
     const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
-    const response = await fetch(url);
-    const data = await response.json();
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
 
-    if (response.ok) {
-        updateWeatherCard(data);
-    } else {
-        alert('City not found. Please enter a valid city.');
+        if (response.ok) {
+            updateWeatherCard(data);
+            hideErrorMessage();
+        } else {
+            showErrorMessage('City not found. Please enter a valid city.');
+        }
+    } catch (error) {
+        showErrorMessage('An error occurred. Please try again later.');
+    } finally {
+        hideLoading();
     }
 }
 
-// Function to fetch weather data by latitude and longitude
-async function getWeatherByLocation(latitude, longitude) {
-    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric`;
-    const response = await fetch(url);
-    const data = await response.json();
+// Function to show loading spinner
+function showLoading() {
+    document.getElementById('loading').classList.remove('hidden');
+}
 
-    if (response.ok) {
-        updateWeatherCard(data);
+// Function to hide loading spinner
+function hideLoading() {
+    document.getElementById('loading').classList.add('hidden');
+}
+
+// Function to show error message
+function showErrorMessage(message) {
+    const errorMessage = document.getElementById('errorMessage');
+    errorMessage.textContent = message;
+    errorMessage.classList.remove('hidden');
+}
+
+// Function to hide error message
+function hideErrorMessage() {
+    const errorMessage = document.getElementById('errorMessage');
+    errorMessage.classList.add('hidden');
+}
+
+// Toggle between Celsius and Fahrenheit
+document.getElementById('unitToggle').addEventListener('click', () => {
+    isCelsius = !isCelsius;
+    updateUnit();
+});
+
+// Function to update the displayed temperature unit
+function updateUnit() {
+    const temperatureElement = document.getElementById('temperature');
+    const currentTemp = parseFloat(temperatureElement.textContent);
+
+    if (isCelsius) {
+        temperatureElement.textContent = `${Math.round((currentTemp - 32) * (5 / 9))}°`;
+        document.getElementById('unitToggle').textContent = '°C';
     } else {
-        alert('Unable to fetch weather data for your location.');
+        temperatureElement.textContent = `${Math.round((currentTemp * (9 / 5)) + 32)}°`;
+        document.getElementById('unitToggle').textContent = '°F';
     }
 }
 
-// Function to get the country name from the country code
-const getCountryName = (code) => {
-    return new Intl.DisplayNames(['en'], { type: 'region' }).of(code);
-}
-
-// Function to update date and time dynamically
-function getLocalTime(timezoneOffset) {
-    const utcTime = new Date(); // Get current UTC time
-    const localTime = new Date(utcTime.getTime() + timezoneOffset * 1000); // Convert offset to milliseconds and adjust UTC time
-    const options = { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric', 
-        hour: '2-digit', 
-        minute: '2-digit' 
-    };
-    
-    return localTime.toLocaleDateString('en-US', options); // Format and return local time as string
-}
-
-
-// Function to update weather card with fetched data
+// Function to update the weather card with fetched data
 function updateWeatherCard(data) {
     const cityName = document.getElementById('cityName');
     const dateTime = document.getElementById('dateTime');
@@ -61,9 +79,6 @@ function updateWeatherCard(data) {
     const pressure = document.getElementById('pressure');
     const weatherIcon = document.getElementById('weatherIcon');
 
-    const now = new Date();
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-
     cityName.textContent = `${data.name}, ${getCountryName(data.sys.country)}`;
     dateTime.textContent = getLocalTime(data.timezone);
     weatherCondition.textContent = data.weather[0].main;
@@ -74,51 +89,83 @@ function updateWeatherCard(data) {
     windSpeed.textContent = `${data.wind.speed} m/s`;
     pressure.textContent = `${data.main.pressure} hPa`;
 
-    // Update weather icon color based on temperature (just an example)
-    const tempCelsius = Math.round(data.main.temp);
-    if (tempCelsius > 30) {
-        weatherIcon.classList.add('bg-red-500');
-        weatherIcon.classList.remove('bg-blue-500', 'bg-yellow-500');
-    } else if (tempCelsius > 20) {
-        weatherIcon.classList.add('bg-yellow-500');
-        weatherIcon.classList.remove('bg-red-500', 'bg-blue-500');
-    } else {
-        weatherIcon.classList.add('bg-blue-500');
-        weatherIcon.classList.remove('bg-red-500', 'bg-yellow-500');
+    // Update icon based on weather condition
+    weatherIcon.style.backgroundColor = getWeatherIconColor(data.main.temp);
+}
+
+// Get the background color for the weather icon based on temperature
+function getWeatherIconColor(temp) {
+    if (temp < 10) return '#1E90FF'; // Cold - blue
+    else if (temp < 20) return '#FFD700'; // Mild - yellow
+    else return '#FF6347'; // Hot - red
+}
+
+// Convert country code to country name
+function getCountryName(code) {
+    const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
+    return regionNames.of(code);
+}
+
+// Convert UTC timestamp to local time
+function getLocalTime(timezone) {
+    const now = new Date();
+    const localTime = new Date(now.getTime() + timezone * 1000);
+    return localTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+// Event listener for search button
+document.getElementById('btnSearch').addEventListener('click', () => {
+    const city = document.getElementById('cityInput').value;
+    fetchWeather(city);
+});
+// Function to fetch weather data by latitude and longitude
+async function getWeatherByLocation(latitude, longitude) {
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric`;
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (response.ok) {
+            updateWeatherCard(data);
+        } else {
+            showError('Unable to fetch weather data for your location.');
+        }
+    } catch (error) {
+        console.error('Error fetching weather data:', error);
+        showError('An error occurred while fetching weather data.');
     }
 }
 
-// Handle search on pressing Enter
-const cityInput = document.getElementById('cityInput');
-cityInput.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') {
-        const city = cityInput.value;
-        fetchWeather(city);
-    }
-});
+// Error message handler
+function showError(message) {
+    const errorMessage = document.getElementById('errorMessage');
+    errorMessage.textContent = message;
+    errorMessage.classList.remove('hidden');
+}
 
-// Handle search on pressing search button
-const citySearch = document.getElementById('btnSearch');
-citySearch.addEventListener('click', function () {
-        const city = cityInput.value;
-        fetchWeather(city);
-});
-
-// Get current location and fetch weather data
+// Function to get user's location and fetch weather data
 function getCurrentLocation() {
     if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((position) => {
-            const latitude = position.coords.latitude;
-            const longitude = position.coords.longitude;
-            getWeatherByLocation(latitude, longitude);
-        }, (error) => {
-            console.error("Error getting location: ", error);
-            alert("Unable to retrieve your location. Please enable location services.");
-        });
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const latitude = position.coords.latitude;
+                const longitude = position.coords.longitude;
+                getWeatherByLocation(latitude, longitude);  // Fetch weather for current location
+            },
+            (error) => {
+                console.error('Error getting location:', error);
+                if (error.code === error.PERMISSION_DENIED) {
+                    showError('Permission to access location was denied. Please enable location services.');
+                } else {
+                    showError('Unable to retrieve your location. Please try again later.');
+                }
+            }
+        );
     } else {
-        alert("Geolocation is not supported by your browser.");
+        showError('Geolocation is not supported by your browser.');
     }
 }
 
-// Fetch weather data based on user's current location when page loads
+// Call this function on page load to auto-fetch location-based weather
 window.onload = getCurrentLocation;
+
